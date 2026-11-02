@@ -34,7 +34,7 @@
  </div>
  <header class="hud">
   <div class="project plaque"><span>项目</span><b id="projectNumber">01</b></div>
-  <div class="top-right"><div id="timer" class="timer plaque"><small>DDL</small><time id="timeLeft">30.0</time></div>
+  <div class="top-right"><div id="timer" class="timer plaque"><small>DDL</small><time id="timeLeft">20.0</time></div>
    <button id="soundButton" class="icon-button" aria-label="关闭声音" aria-pressed="false" title="声音"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h3l4-4v12l-4-4H2z"/><path id="soundWaves" d="M11 4h2v2h1v4h-1v2h-2v-2h1V6h-1z"/></svg></button>
    <button id="pauseButton" class="icon-button" aria-label="暂停" title="暂停 · Esc"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h4v12H3zm7 0h4v12h-4z"/></svg></button>
   </div>
@@ -187,7 +187,7 @@
   const MASK_ON = 0.18;
   const MASK_OFF = 0.15;
   const BASE_COMPLETION_TIME = 15;
-  const INITIAL_REACTION_ALLOWANCE = 15;
+  const INITIAL_REACTION_ALLOWANCE = 5;
   const MIN_REACTION_ALLOWANCE = 3;
   const DDL_DECREMENT = 4;
   const MAX_FRAME_DELTA = 0.25;
@@ -1003,6 +1003,7 @@ const model=new PixelGameModel(),sound=new PixelAudio(A.audio),images={};
 const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*clamp(t);
 let loaded=false,raf=0,last=0,visualTime=0,cinematic=null,cinematicPaused=false,modeWas='menu',lastActor='working',lastPhase='away',keyTick=0,footTick=0,toastUntil=0,muted=false,reduce=false,best=0,lastProject=1;
 const LETTER_START=.45,LETTER_DURATION=1.35;
+const URGENT_SECONDS=8;
 let paperMotion=null;
 let dialogueStartWork=null,dialogueLastWork=0,dialogueProject=0,dialogueSpeaker='off';
 const corridorShadow=document.createElement('canvas');corridorShadow.id='corridorShadowLayer';corridorShadow.width=240;corridorShadow.height=104;
@@ -1129,7 +1130,7 @@ function drawProgrammer(info){
 }
 function drawAmbient(info){
  if(reduce)return;
- if(info.remaining<5&&info.mode==='playing'){ctx.fillStyle=`rgba(112,41,31,${.025+.018*Math.sin(visualTime*3)})`;ctx.fillRect(0,0,W,H)}
+ if(info.remaining<=URGENT_SECONDS&&info.mode==='playing'){ctx.fillStyle=`rgba(112,41,31,${.025+.018*Math.sin(visualTime*3)})`;ctx.fillRect(0,0,W,H)}
 }
 function updateWorkDialogue(info){
  const working=info.mode==='playing'&&info.actor==='working'&&!cinematic&&!cinematicPaused;
@@ -1165,7 +1166,7 @@ function updateUI(info){
  game.dataset.mode=info.mode;game.dataset.actor=info.actor;
  game.dataset.cinematicPaused=String(cinematicPaused);
  $('projectNumber').textContent=String(info.project).padStart(2,'0');
- $('timeLeft').textContent=info.remaining.toFixed(1);$('timer').dataset.urgent=String(info.remaining<5);
+ $('timeLeft').textContent=info.remaining.toFixed(1);$('timer').dataset.urgent=String(info.remaining<=URGENT_SECONDS);
  const pct=info.progress;
  $('progressValue').textContent=Math.floor(pct+1e-6)+'%';$('progressFill').style.width=pct+'%';$('progressCursor').style.left=pct+'%';$('progressTrack').setAttribute('aria-valuenow',Math.floor(pct));
  const masked=info.actor==='masked',held=masked||info.actor==='equipping';
